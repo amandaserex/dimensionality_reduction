@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+
+import matplotlib.pyplot as plt
+import numpy as np
+#import scipy
+
+def read_data(path):
+    """
+    Read the input file and store it in data_set.
+
+    DO NOT CHANGE SIGNATURE OF THIS FUNCTION
+
+    Args:
+        path: path to the dataset
+
+    Returns:
+        data_set: n_samples x n_features
+            A list of data points, each data point is itself a list of features.
+    """
+    data_set = []
+    y = -1
+    with open(path, "r") as file:
+        for line in file:
+            y = y+1
+            data_set.append([])
+            currentline = line.split(",")
+            for x in currentline:
+                data_set[y].append(float(x.rstrip()))
+    return data_set
+
+def pca(data_set, n_components):
+    def first(item):
+        return item[0]
+    """
+    Perform principle component analysis and dimentinality reduction.
+
+    DO NOT CHANGE SIGNATURE OF THIS FUNCTION
+
+    Args:
+        data_set: n_samples x n_features
+            The dataset, as generated in read_data.
+        n_components: int
+            The number of components to keep. If n_components is None, all components should be kept.
+
+    Returns:
+        components: n_components x n_features
+            Principal axes in feature space, representing the directions of maximum variance in the data.
+            They should be sorted by the amount of variance explained by each of the components.
+    """
+
+    covarience_matrix = np.cov(np.transpose(np.array(data_set)))
+    w, v = np.linalg.eig(covarience_matrix)
+    zipped_lists = zip(w, v)
+    z = [x for _, x in sorted(zipped_lists, key = first, reverse = True)]
+    z = np.array(z)
+    if(n_components == None):
+        return z
+    z = z[:,range(n_components)]
+    return z
+
+
+def dim_reduction(data_set, components):
+    """
+    perform dimensionality reduction (change of basis) using the components provided.
+
+    DO NOT CHANGE SIGNATURE OF THIS FUNCTION
+
+    Args:
+        data_set: n_samples x n_features
+            The dataset, as generated in read_data.
+        components: n_components x n_features
+            Principal axes in feature space, representing the directions of maximum variance in the data.
+            They should be sorted by the amount of variance explained by each of the components.
+
+    Returns:
+        transformed: n_samples x n_components
+            Return the transformed values.
+    """
+    transformed = []
+    index = -1
+    transformed = data_set @ components
+    return transformed
+
+# You may put code here to test your program. They will not be run during grading.
+
+data_set = read_data("pizza.txt")
+components = pca(data_set,2)
+dim = dim_reduction(data_set, components)
+one=[]
+two=[]
+for x in dim:
+    one.append(x[0])
+    two.append(x[1])
+
+plt.scatter(one,two)
+plt.show()
